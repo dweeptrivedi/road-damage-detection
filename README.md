@@ -13,7 +13,7 @@ You need to install:
 - [Python3](https://www.python.org/downloads/)
 
 ## Quick-start
-1. To start using the vehicle-detector you need to clone the repo: `https://github.com/dweeptrivedi/road-damage-detection.git`
+1. Clone the repo: `https://github.com/dweeptrivedi/road-damage-detection.git`
 
 2. Execute `./build_darknet.sh`
   - This command will build Yolo library for CPU and GPU
