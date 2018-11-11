@@ -91,7 +91,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='run phase2.')
     parser.add_argument('--approach', type=str, help='name of the approach ["one-phase","cropped","augmented"]',default='one-phase')
-    parser.add_argument('--yolo', type=int, help='yolo iteration number for weights',default=40000)
+    parser.add_argument('--yolo', type=int, help='yolo iteration number for weights',default=45000)
     parser.add_argument('--nms', type=float, help='nms threshold value', default=0.45)
     parser.add_argument('--thresh', type=float, help='threshold value for detector', default=0.1)
     parser.add_argument('--gpu', type=bool, help='want to run on GPU?', default=False)
