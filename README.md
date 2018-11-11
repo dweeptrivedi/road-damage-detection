@@ -19,22 +19,20 @@ You need to install:
 
 ## Running the code
 
-Testing:
+### Testing:
 
-- run `python3 detector.py` for default network
+- `test.txt` should contain list of image paths that needs detection.
 
-- run `python3 detector.py --help` for commandline options
+- run `python3 detector.py` for default network.
 
 - Best combination examples:
-    - `python3 detector.py --input-file="test.txt" --approach="one-phase" --yolo=45000 --nms=0.999 --thresh=0.1 --gpu=False`
-    - `python3 detector.py --input-file="test.txt" --approach="augmented" --yolo=60000 --nms=0.999 --thresh=0.1 --gpu=False`
-    - `python3 detector.py --input-file="test.txt" --approach="cropped" --yolo=60000 --nms=0.999 --thresh=0.1 --gpu=False`
+    - `python3 detector.py --input-file="test.txt" --approach="one-phase" --yolo=45000 --nms=0.999 --thresh=0.1`
+    - `python3 detector.py --input-file="test.txt" --approach="augmented" --yolo=60000 --nms=0.999 --thresh=0.1`
+    - `python3 detector.py --input-file="test.txt" --approach="cropped" --yolo=60000 --nms=0.999 --thresh=0.1`
 
-Training:
+### Training:
 
-- Yolo:
-
-    For training Yolo network for road damage detection task, please follow steps mentioned in [Yolo](https://pjreddie.com/darknet/yolo/) website.
+- Yolo: For training Yolo network for road damage detection task, please follow steps mentioned in [Yolo](https://pjreddie.com/darknet/yolo/) website.
 
 ## Authors:
 * **Dweep Trivedi** - Please give me your feedback: dweeptrivedi1994@gmail.com
