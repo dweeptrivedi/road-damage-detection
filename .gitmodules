@@ -1,3 +1,0 @@
-[submodule "train/darknet"]
-	path = train/darknet
-	url = https://github.com/pjreddie/darknet
