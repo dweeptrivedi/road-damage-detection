@@ -16,7 +16,6 @@ You need to install:
 1. Clone the repo: `https://github.com/dweeptrivedi/road-damage-detection.git`
 
 2. Execute `./build_darknet.sh`
-  - This command will build Yolo library for CPU and GPU
 
 ## Running the code
 
