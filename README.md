@@ -12,6 +12,7 @@ This repository contains code and weights for Road Damage Detection and Classifi
 
 You need to install:
 - [Python3](https://www.python.org/downloads/)
+- [opencv](https://opencv.org/)
 
 ## Quick-start
 1. Clone the repo: `https://github.com/dweeptrivedi/road-damage-detection.git`
