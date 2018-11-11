@@ -1,5 +1,7 @@
 # road damage detection
 
+This repository contains code and weights for Road Damage Detection and Classification Challenge:  https://bdc2018.mycityreport.net/overview/
+
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
@@ -24,7 +26,7 @@ You need to install:
 
 - run `python3 detector.py` for default network.
 
-- Best combination examples:
+- Best combination for the Challenge:
     - `python3 detector.py --input-file="test.txt" --approach="one-phase" --yolo=45000 --nms=0.999 --thresh=0.01`
     - `python3 detector.py --input-file="test.txt" --approach="augmented" --yolo=60000 --nms=0.999 --thresh=0.0508`
     - `python3 detector.py --input-file="test.txt" --approach="cropped" --yolo=60000 --nms=0.999 --thresh=0.15`
@@ -42,4 +44,4 @@ You need to install:
 
 ### Training:
 
-- Yolo: For training Yolo network for road damage detection task, please follow steps mentioned in [Yolo](https://pjreddie.com/darknet/yolo/) website.
+- Yolo: For training darknet53 network for road damage detection task, please follow steps mentioned in [Yolo](https://pjreddie.com/darknet/yolo/) website.
