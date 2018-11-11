@@ -43,17 +43,41 @@ class METADATA(Structure):
                 ("names", POINTER(c_char_p))]
 
     
+lib = None
 load_net = None
 load_meta = None
+set_gpu = None
 
 def init_net(cpu=True):
-    global load_net, load_meta
+    global lib, load_net, load_meta, set_gpu
     if cpu==True:
         lib = CDLL("src/libdarknet_cpu.so", RTLD_GLOBAL)
     else:
         lib = CDLL("src/libdarknet_gpu.so", RTLD_GLOBAL)
         set_gpu = lib.cuda_set_device
         set_gpu.argtypes = [c_int]
+
+    load_net = lib.load_network
+    load_net.argtypes = [c_char_p, c_char_p, c_int]
+    load_net.restype = c_void_p
+
+    load_meta = lib.get_metadata
+    lib.get_metadata.argtypes = [c_char_p]
+    lib.get_metadata.restype = METADATA
+
+
+
+
+def classify(net, meta, im):
+    out = predict_image(net, im)
+    res = []
+    for i in range(meta.classes):
+        res.append((meta.names[i], out[i]))
+    res = sorted(res, key=lambda x: -x[1])
+    return res
+
+def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
+    global lib, load_net, load_meta
 
     lib.network_width.argtypes = [c_void_p]
     lib.network_width.restype = c_int
@@ -88,10 +112,6 @@ def init_net(cpu=True):
     reset_rnn = lib.reset_rnn
     reset_rnn.argtypes = [c_void_p]
 
-    load_net = lib.load_network
-    load_net.argtypes = [c_char_p, c_char_p, c_int]
-    load_net.restype = c_void_p
-
     do_nms_obj = lib.do_nms_obj
     do_nms_obj.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
 
@@ -105,12 +125,9 @@ def init_net(cpu=True):
     letterbox_image.argtypes = [IMAGE, c_int, c_int]
     letterbox_image.restype = IMAGE
 
-    load_meta = lib.get_metadata
-    lib.get_metadata.argtypes = [c_char_p]
-    lib.get_metadata.restype = METADATA
-
     load_image = lib.load_image_color
     load_image.argtypes = [c_char_p, c_int, c_int]
+
     load_image.restype = IMAGE
 
     rgbgr_image = lib.rgbgr_image
@@ -120,15 +137,6 @@ def init_net(cpu=True):
     predict_image.argtypes = [c_void_p, IMAGE]
     predict_image.restype = POINTER(c_float)
 
-def classify(net, meta, im):
-    out = predict_image(net, im)
-    res = []
-    for i in range(meta.classes):
-        res.append((meta.names[i], out[i]))
-    res = sorted(res, key=lambda x: -x[1])
-    return res
-
-def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
     im = load_image(image, 0, 0)
     num = c_int(0)
     pnum = pointer(num)

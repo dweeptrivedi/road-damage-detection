@@ -17,9 +17,9 @@ def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, sc
     yolo_weights = (approach+"/weights/yolov3_"+str(yolo_weight)+".weights").encode()
     yolo_data = (approach+"/darknet/damage.data").encode()
 
+    dn.init_net(cpu)
     if cpu==False:
         dn.set_gpu(0)
-    dn.init_net(cpu)
     net = dn.load_net(yolo_model, yolo_weights, 0)
     meta = dn.load_meta(yolo_data)
 
@@ -95,19 +95,18 @@ def main():
     parser.add_argument('--nms', type=float, help='nms threshold value', default=0.45)
     parser.add_argument('--thresh', type=float, help='threshold value for detector', default=0.1)
     parser.add_argument('--gpu', type=bool, help='want to run on GPU?', default=False)
-    parser.add_argument('--input-file', type=str, help='location to the input list of test images',default='src/test.txt')
+    parser.add_argument('--input-file', type=str, help='location to the input list of test images',default='test.txt')
     args = parser.parse_args()
     
     app = args.approach
     y = args.yolo
-    c = args.caffe
     t = args.thresh
     nms = args.nms
-    s = args.scaled
     cpu = not args.gpu
+    test_file = args.input_file
     
     t1 = time.time()
-    deploy_func(app,y,c,t,nms,s,cpu)
+    deploy_func(test_file,app,y,None,t,nms,None,cpu)
     t2 = time.time()
     if app=="two-phase":
         with open("output/time.txt"+"_"+app+"_"+str(y)+"_"+str(c)+"_"+str(t)+"_"+str(nms)+"_"+str(s),"w") as f:
