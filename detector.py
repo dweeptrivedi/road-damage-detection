@@ -12,7 +12,7 @@ from collections import defaultdict
 import src.darknet as dn
 
 
-def deploy_func(approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
+def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
     yolo_model = (approach+"/darknet/yolov3.cfg.test").encode()
     yolo_weights = (approach+"/weights/yolov3_"+str(yolo_weight)+".weights").encode()
     yolo_data = (approach+"/darknet/damage.data").encode()
@@ -24,7 +24,7 @@ def deploy_func(approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
     meta = dn.load_meta(yolo_data)
 
     #list of test images
-    with open("test.txt","r") as f:
+    with open(input_file,"r") as f:
         lines = f.readlines()
 
     imageList = [line.strip() for line in lines]
@@ -90,13 +90,12 @@ def main():
     
     
     parser = argparse.ArgumentParser(description='run phase2.')
-    parser.add_argument('--approach', type=str, help='name of the approach',default='one-phase')
+    parser.add_argument('--approach', type=str, help='name of the approach ["one-phase","cropped","augmented"]',default='one-phase')
     parser.add_argument('--yolo', type=int, help='yolo iteration number for weights',default=40000)
-    parser.add_argument('--caffe', type=int, help='caffe iteration number for weights', default=60000)
-    parser.add_argument('--nms', type=float, help='caffe iteration number for weights', default=0.45)
+    parser.add_argument('--nms', type=float, help='nms threshold value', default=0.45)
     parser.add_argument('--thresh', type=float, help='threshold value for detector', default=0.1)
-    parser.add_argument('--scaled', type=int, help='caffe scale', default=0)
-    parser.add_argument('--gpu', type=bool, help='caffe scale', default=False)
+    parser.add_argument('--gpu', type=bool, help='want to run on GPU?', default=False)
+    parser.add_argument('--input-file', type=str, help='location to the input list of test images',default='src/test.txt')
     args = parser.parse_args()
     
     app = args.approach
