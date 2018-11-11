@@ -5,7 +5,6 @@
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
 - [Running the code](#running-the-code)
-- [Authors](#authors)
 
 ## Prerequisites
 
@@ -33,6 +32,3 @@ You need to install:
 ### Training:
 
 - Yolo: For training Yolo network for road damage detection task, please follow steps mentioned in [Yolo](https://pjreddie.com/darknet/yolo/) website.
-
-## Authors:
-* **Dweep Trivedi** - Please give me your feedback: dweeptrivedi1994@gmail.com
