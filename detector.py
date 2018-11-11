@@ -12,12 +12,14 @@ from collections import defaultdict
 import src.darknet as dn
 
 
-def deploy_func(approach, yolo_weight, caffe_weight, thresh, nms, scaled):
+def deploy_func(approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
     yolo_model = (approach+"/darknet/yolov3.cfg.test").encode()
     yolo_weights = (approach+"/weights/yolov3_"+str(yolo_weight)+".weights").encode()
     yolo_data = (approach+"/darknet/damage.data").encode()
 
-    dn.set_gpu(0)
+    if cpu==False:
+        dn.set_gpu(0)
+    dn.init_net(cpu)
     net = dn.load_net(yolo_model, yolo_weights, 0)
     meta = dn.load_meta(yolo_data)
 
@@ -94,6 +96,7 @@ def main():
     parser.add_argument('--nms', type=float, help='caffe iteration number for weights', default=0.45)
     parser.add_argument('--thresh', type=float, help='threshold value for detector', default=0.1)
     parser.add_argument('--scaled', type=int, help='caffe scale', default=0)
+    parser.add_argument('--gpu', type=bool, help='caffe scale', default=False)
     args = parser.parse_args()
     
     app = args.approach
@@ -102,9 +105,10 @@ def main():
     t = args.thresh
     nms = args.nms
     s = args.scaled
+    cpu = not args.gpu
     
     t1 = time.time()
-    deploy_func(app,y,c,t,nms,s)
+    deploy_func(app,y,c,t,nms,s,cpu)
     t2 = time.time()
     if app=="two-phase":
         with open("output/time.txt"+"_"+app+"_"+str(y)+"_"+str(c)+"_"+str(t)+"_"+str(nms)+"_"+str(s),"w") as f:
