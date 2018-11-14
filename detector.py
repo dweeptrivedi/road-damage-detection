@@ -22,7 +22,7 @@ import src.darknet as dn
 
 
 def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
-    yolo_model = (approach+"/darknet/yolov3.cfg.test").encode()
+    yolo_model = ("model/darknet/yolov3.cfg.test").encode()
     yolo_weights = (approach+"/weights/yolov3_"+str(yolo_weight)+".weights").encode()
     yolo_data = (approach+"/darknet/damage.data").encode()
 
@@ -177,7 +177,7 @@ def deploy_func_two_phase(net, meta, imageList, name_to_id, thresh, nms, caffe_w
     f.close()
     
     # Classifier
-    model = "two-phase/caffe/train_val.prototxt.test"
+    model = "model/caffe/train_val.prototxt.test"
     weights = "two-phase/caffe/weights/crop_"+str(scaled)+"/bvlc_googlenet_iter_"+str(caffe_weight)+".caffemodel"
 
     clf = CaffePredictor(model,weights)
