@@ -11,6 +11,7 @@ try:
     os.environ['GLOG_minloglevel'] = '2' 
     import caffe
     from src.deploy_street import CaffePredictor
+    caffe_support = True
 except ImportError as e:
     print("caffe not installed, disable two-phase approach")
     caffe_support = False
@@ -22,6 +23,24 @@ import src.darknet as dn
 
 
 def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, scaled, cpu):
+    """main function to deploy road damage detection model
+    
+    This function
+    1) loads the darknet model based on the approach, architecture suppport
+    2) calls appropriate functions to get predictions
+    3) saves predictions in required format of the road damage detection competetion
+    
+    Args:
+        input_file (str): contains list of image paths that needs detection.
+        approach (str): name of the approach ["one-phase","cropped","augmented","augmented2","two-phase"]
+        yolo_weight (int): yolo iteration number for weights
+        caffe_weight (int): caffe iteration number for weights
+        thresh (float): threshold value for detector
+        nms (float): nms threshold value
+        scaled (int): caffe scale
+        cpu (bool): True if want to run on CPU
+    """
+    
     yolo_model = (approach+"/darknet/yolov3.cfg.test").encode()
     yolo_weights = (approach+"/weights/yolov3_"+str(yolo_weight)+".weights").encode()
     yolo_data = (approach+"/darknet/damage.data").encode()
@@ -47,13 +66,16 @@ def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, sc
 
     if approach=="one-phase" or approach=="augmented" or approach=="augmented2" or approach=="cropped":
         pred_dict = deploy_func_one_phase(net, meta, imageList, name_to_id, thresh, nms)
-        csvFile = open("output/sample_submission.csv"+"_"+approach+"_"+str(yolo_weight)+"_"+str(thresh)+"_"+str(nms),"w")
+        csvFile = open("output/sample_submission.csv"+"_"+approach+"_"+str(yolo_weight)+
+                       "_"+str(thresh)+"_"+str(nms),"w")
     elif approach=="two-phase":
         if caffe_support == True:
             pred_dict = deploy_func_two_phase(net, meta, imageList, name_to_id, thresh, nms, caffe_weight, scaled)
         else:
             print("Caffe not supported on this system, can't run two-phase approach.")
-        csvFile = open("output/sample_submission.csv"+"_"+approach+"_"+str(yolo_weight)+"_"+str(caffe_weight)+"_"+str(thresh)+"_"+str(nms)+"_"+str(scaled),"w")
+            return
+        csvFile = open("output/sample_submission.csv"+"_"+approach+"_"+str(yolo_weight)+
+                       "_"+str(caffe_weight)+"_"+str(thresh)+"_"+str(nms)+"_"+str(scaled),"w")
     else:
         assert(0)
 
@@ -65,11 +87,24 @@ def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, sc
     csvFile.close()
 
 def deploy_func_one_phase(net, meta, imageList, name_to_id, thresh, nms):
+    """object detection pipeline for one-phase,augmented,augmented2,cropped approach
+    
+    Args:
+        net (obj): YOLO darknet model
+        meta (obj): YOLO darknet model metadata
+        imageList (list): list of image paths to predict
+        name_to_id (dict): class name to class id mapping
+        thresh (float): threshold value for detector
+        nms (float): nms threshold value
+        
+    Returns:
+        dict: dict of predicted bounding boxes
+    """
     
     # pipeline: object detection
     box_id = 0
     pred_dict = defaultdict(dict)
-    for img_file in imageList:
+    for idx, img_file in enumerate(imageList):
         dets = dn.detect(net, meta,img_file.encode('utf-8'), thresh=thresh, nms=nms)
         pred_box_list = []
         for bbox in dets:   
@@ -97,51 +132,34 @@ def deploy_func_one_phase(net, meta, imageList, name_to_id, thresh, nms):
     return pred_dict
 
 
-
-def phase2_get_cropped(pred_dict, scale=0.0):
-    return_dict = {}
+def deploy_func_two_phase(net, meta, imageList, name_to_id, thresh, nms, caffe_weight, scaled):
+    """object detection pipeline for two-phase approach
+    
+    Args:
+        net (obj): YOLO darknet model
+        meta (obj): YOLO darknet model metadata
+        imageList (list): list of image paths to predict
+        name_to_id (dict): class name to class id mapping
+        thresh (float): threshold value for detector
+        nms (float): nms threshold value
+        caffe_weight (int): caffe iteration number for weights
+        scaled (int): caffe scale
+                
+    Returns:
+        dict: dict of predicted bounding boxes
+    """
+    
     os.system("rm -rf ./two-phase/predictions")
     os.system("mkdir ./two-phase/predictions")
-    for img_file in pred_dict:
-            pred_box_list = pred_dict[img_file]
-            img = cv2.imread(img_file)
 
-            return_list = []
-            for bbox in pred_box_list:
-                box_id,pred,conf,x1_unscaled,y1_unscaled,x2_unscaled,y2_unscaled = bbox[:]
-                y1 = max(0,int((1-scale)*y1_unscaled))
-                y2 = min(int((y2_unscaled)*(1+scale)),img.shape[0])
-                x1 = max(0,int((1-scale)*x1_unscaled))
-                x2 = min(int((x2_unscaled)*(1+scale)),img.shape[1])
-
-                crop_img = img[y1:y2,x1:x2]
-                crop_img_name = os.path.basename(img_file).rsplit('.',1)
-                crop_img_name = crop_img_name[0]+"_predicted_crop_"+str(int(box_id))+"."+crop_img_name[1]
-                crop_img_file = os.path.abspath(os.path.join("./two-phase/predictions",crop_img_name))
-
-                if crop_img.size > 0:
-                    cv2.imwrite(crop_img_file,crop_img)
-                    return_list.append([crop_img_file,[x1,y1,x2,y2],bbox])
-
-            return_dict[img_file] = return_list
-    return return_dict
-
-
-def deploy_func_two_phase(net, meta, imageList, name_to_id, thresh, nms, caffe_weight, scaled):
-    # phase 1 pipeline: object detection
-
+    # pipeline: object detection
     y_pred_temp = {}
-
-    if scaled == 1:
-        scale = 0.3
-    else:
-        scale = 0.0
-    
+    scale = 0.3 if scaled==1 else 0.0
     box_id = 0
-    pred_dict = defaultdict(dict)
-    for img_file in imageList:
+    return_dict = defaultdict(dict)
+    for idx, img_file in enumerate(imageList):
         dets = dn.detect(net, meta, img_file.encode('utf-8'), thresh=thresh, nms=nms)
-        pred_box_list = []
+        return_list = []
         for bbox in dets:   
             [x,y,w,h] = bbox[2]
             #https://github.com/pjreddie/darknet/issues/243
@@ -154,17 +172,33 @@ def deploy_func_two_phase(net, meta, imageList, name_to_id, thresh, nms, caffe_w
             y2_unscaled = int(min((y+h),img.shape[0]))
             x1_unscaled = int(max(0,x))
             x2_unscaled = int(min((x+w),img.shape[1]))
+            
+            
+            if scale > 0.0:
+                y1 = max(0,int((1-scale)*y1_unscaled))
+                y2 = min(int((y2_unscaled)*(1+scale)),img.shape[0])
+                x1 = max(0,int((1-scale)*x1_unscaled))
+                x2 = min(int((x2_unscaled)*(1+scale)),img.shape[1])
+            else:
+                y1 = y1_unscaled
+                y2 = y2_unscaled
+                x1 = x1_unscaled
+                x2 = x2_unscaled
 
-            crop_img = img[y1_unscaled:y2_unscaled,x1_unscaled:x2_unscaled]
-
+            crop_img = img[y1:y2,x1:x2]
+            crop_img_name = os.path.basename(img_file).rsplit('.',1)
+            crop_img_name = crop_img_name[0]+"_predicted_crop_"+str(int(box_id))+"."+crop_img_name[1]
+            crop_img_file = os.path.abspath(os.path.join("./two-phase/predictions",crop_img_name))
+            
             if crop_img.size > 0:
                 pred = box_id
-                pred_box_list.append(np.array([box_id,pred,bbox[1],x1_unscaled,y1_unscaled,x2_unscaled,y2_unscaled]))
+                cv2.imwrite(crop_img_file,crop_img)
+                return_list.append([crop_img_file,[x1,y1,x2,y2],
+                                    np.array([box_id,pred,bbox[1],x1,y1,x2,y2])])
                 box_id += 1
 
-        pred_dict[img_file] = np.array(pred_box_list)
-  
-    return_dict = phase2_get_cropped(pred_dict,scale=scale)
+        return_dict[img_file] = return_list
+
 
     #create test_8c.temp for level1:
     f = open("test_8c.temp","w")
@@ -213,7 +247,9 @@ def main():
     
     
     parser = argparse.ArgumentParser(description='run phase2.')
-    parser.add_argument('--approach', type=str, help='name of the approach ["one-phase","cropped","augmented"]',default='one-phase')
+    parser.add_argument('--approach', type=str,
+                        help='name of the approach ["one-phase","cropped","augmented","augmented2","two-phase"]',
+                        default='one-phase')
     parser.add_argument('--yolo', type=int, help='yolo iteration number for weights',default=45000)
     parser.add_argument('--caffe', type=int, help='caffe iteration number for weights', default=60000)
     parser.add_argument('--nms', type=float, help='nms threshold value', default=0.45)
