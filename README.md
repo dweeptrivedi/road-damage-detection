@@ -27,6 +27,8 @@ You need to install:
 
 - `test.txt` should contain list of image paths that needs detection.
 
+- `./output/` will contain output file
+
 - run `python3 detector.py` for default network.
 
 - Best combination for the Challenge:
@@ -44,6 +46,9 @@ You need to install:
 | --nms | float value in [0,1] | 0.45 | nms threshold value for dropping overlapping predictions |
 | --thresh | float value in [0,1] | 0.1 | confidence threshold value for predictions |
 | --gpu | boolean | False | whether to use GPU or not. Set this option only if `build_darknet.sh` returned successful build for GPU |
+| --caffe | int | 45000 | iteration number of Caffe weight file. I have uploaded one weight file (best performance on test dataset) for each approach  |
+| --scale | {0,1} | 0 | Caffe scale  |
+
 
 ### Training:
 
