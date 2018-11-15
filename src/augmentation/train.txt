@@ -1,0 +1,1 @@
+/data/projects/road_damage_final/final_4/road-damage-detection/data/train/JPEGImages/Adachi_20170906093835.jpg
