@@ -1,1 +1,6 @@
-data/test.jpg
+data/test/JPEGImages/test1.jpg
+data/test/JPEGImages/test2.jpg
+data/test/JPEGImages/test3.jpg
+data/test/JPEGImages/test4.jpg
+data/test/JPEGImages/test5.jpg
+data/test/JPEGImages/test6.jpg

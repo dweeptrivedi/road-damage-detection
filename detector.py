@@ -85,6 +85,7 @@ def deploy_func(input_file, approach, yolo_weight, caffe_weight, thresh, nms, sc
             csvFile.write(str(int(bbox[1]))+" "+str(int(bbox[3]))+" "+str(int(bbox[4]))+" "+str(int(bbox[5]))+" "+str(int(bbox[6]))+" ")
         csvFile.write("\n")
     csvFile.close()
+    return pred_dict
 
 def deploy_func_one_phase(net, meta, imageList, name_to_id, thresh, nms):
     """object detection pipeline for one-phase,augmented,augmented2,cropped approach
