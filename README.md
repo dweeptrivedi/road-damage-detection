@@ -104,4 +104,16 @@ NOTE: It is expected that the Dataset be structured in PASCAL VOC format (images
 
 ## Citation
 
+If you used this code for your experiments or found it helpful, consider citing the following paper:
 
+<pre>
+@inproceedings{alfarrarjeh2018deep,
+    title={A Deep Learning Approach for Road Damage Detection from Smartphone Images},
+    author={Alfarrarjeh, Abdullah and Trivedi, Dweep and Kim, Seon Ho and Shahabi, Cyrus},
+    booktitle={Proceeding of the 2018 IEEE International Conference on Big Data (Big Data)},
+    pages={5201--5204},
+    year={2018},
+    organization={IEEE},
+    location = {Seattle, WA, USA},
+}
+</pre>
